@@ -1,0 +1,1128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Muscle Debt Score — What Did the Scale Not Tell You?</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    /* Variable names kept from the original dark theme for continuity across
+       the codebase, but values now point to the new light/blue palette pulled
+       from the KTAW logo. --iron = background, --bone = primary text, etc. */
+    --iron:#FFFFFF;
+    --steel:#F0F0F0;
+    --bone:#111111;
+    --ash:#6B6B6B;
+    --rust:#0060F0;
+    --rust-bright:#2D7BFF;
+    --font-display:'Space Grotesk', sans-serif;
+    --font-body:'Inter', sans-serif;
+    --font-mono:'JetBrains Mono', monospace;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{background:#FFFFFF;}
+  body{
+    background:#FFFFFF;
+    color:#111111;
+    font-family:var(--font-body);
+    min-height:100vh;
+    height:100%;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{
+    width:100%;
+    max-width:560px;
+    padding:28px 20px 60px;
+    display:flex;
+    flex-direction:column;
+    min-height:100vh;
+  }
+  .brand{
+    font-family:var(--font-body);
+    font-weight:600;
+    font-size:12px;
+    letter-spacing:0.1em;
+    text-transform:uppercase;
+    color:var(--ash);
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:28px;
+  }
+  .brand strong{color:var(--bone); font-weight:700;}
+  .brand .step-count{font-family:var(--font-mono); text-transform:none; letter-spacing:0;}
+
+  .progress-track{
+    width:100%;
+    height:3px;
+    background:var(--steel);
+    border-radius:2px;
+    margin-bottom:6px;
+    overflow:hidden;
+    display:none;
+  }
+  .progress-track.show{display:block;}
+  .progress-fill{
+    height:100%;
+    background:var(--rust-bright);
+    width:0%;
+    transition:width .4s ease;
+  }
+  .progress-label{
+    font-family:var(--font-mono);
+    font-size:11px;
+    letter-spacing:0;
+    color:var(--ash);
+    margin-bottom:24px;
+    display:none;
+  }
+  .progress-label.show{display:block;}
+
+  .screen{
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    animation:fadeUp .45s ease both;
+  }
+  @keyframes fadeUp{
+    from{opacity:0; transform:translateY(10px);}
+    to{opacity:1; transform:translateY(0);}
+  }
+
+  h1.hero{
+    font-family:var(--font-display);
+    font-weight:700;
+    font-size:42px;
+    line-height:1.05;
+    letter-spacing:-0.01em;
+    margin-bottom:18px;
+  }
+  h1.hero .accent{color:var(--rust-bright);}
+  .sub{
+    font-size:16px;
+    line-height:1.55;
+    color:var(--ash);
+    margin-bottom:34px;
+    max-width:460px;
+  }
+  .eyebrow{
+    font-family:var(--font-mono);
+    font-size:12px;
+    letter-spacing:0;
+    color:var(--rust-bright);
+    margin-bottom:14px;
+    display:flex;
+    align-items:center;
+    gap:7px;
+  }
+  .eyebrow::before{
+    content:'';
+    width:5px;
+    height:5px;
+    border-radius:50%;
+    background:var(--rust-bright);
+    flex-shrink:0;
+  }
+  h2.q{
+    font-family:var(--font-display);
+    font-weight:700;
+    font-size:26px;
+    line-height:1.2;
+    margin-bottom:28px;
+  }
+
+  .btn{
+    font-family:var(--font-display);
+    font-weight:700;
+    font-size:16px;
+    letter-spacing:.01em;
+    background:var(--rust);
+    color:#FFFFFF;
+    border:none;
+    padding:16px 28px;
+    border-radius:2px;
+    cursor:pointer;
+    text-align:center;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    transition:background .2s ease, transform .15s ease;
+    width:100%;
+  }
+  .btn:hover{background:var(--rust-bright);}
+  .btn:active{transform:scale(.98);}
+  .btn:focus-visible{outline:2px solid var(--bone); outline-offset:3px;}
+  .btn.ghost{
+    background:transparent;
+    border:1px solid var(--steel);
+    color:var(--bone);
+  }
+  .btn.ghost:hover{border-color:var(--ash);}
+  .btn.small{width:auto; padding:12px 22px; font-size:14px;}
+
+  .option-list{display:flex; flex-direction:column; gap:10px; margin-bottom:20px;}
+  .option{
+    font-family:var(--font-body);
+    font-size:15px;
+    font-weight:500;
+    background:var(--steel);
+    border:1px solid var(--steel);
+    color:var(--bone);
+    padding:16px 18px;
+    border-radius:2px;
+    cursor:pointer;
+    text-align:left;
+    transition:border-color .15s ease, background .15s ease;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+  }
+  .option:hover{border-color:var(--rust-bright);}
+  .option:focus-visible{outline:2px solid var(--rust-bright); outline-offset:2px;}
+  .option.selected{border-color:var(--rust-bright); background:#EAF2FF;}
+  .option .tag{font-family:var(--font-mono); font-size:11px; color:var(--ash);}
+
+  .branch-card{
+    border:1px solid var(--steel);
+    padding:22px 20px;
+    border-radius:2px;
+    margin-bottom:14px;
+    cursor:pointer;
+    transition:border-color .15s ease, background .15s ease;
+  }
+  .branch-card:hover{border-color:var(--rust-bright); background:#EAF2FF;}
+  .branch-card h3{
+    font-family:var(--font-display);
+    font-size:18px;
+    margin-bottom:6px;
+  }
+  .branch-card p{font-size:14px; color:var(--ash); line-height:1.5;}
+
+  input[type="text"], input[type="email"], input[type="number"], input[type="tel"]{
+    width:100%;
+    background:var(--steel);
+    border:1px solid var(--steel);
+    color:var(--bone);
+    font-family:var(--font-body);
+    font-size:16px;
+    padding:15px 16px;
+    border-radius:2px;
+    margin-bottom:14px;
+  }
+  input:focus{outline:none; border-color:var(--rust-bright);}
+  input::placeholder{color:var(--ash);}
+  label.field-label{
+    font-family:var(--font-mono);
+    font-size:11px;
+    letter-spacing:0;
+    color:var(--ash);
+    display:block;
+    margin-bottom:8px;
+  }
+
+  .checkbox-row{
+    display:flex;
+    align-items:flex-start;
+    gap:12px;
+    padding:14px 16px;
+    border:1px solid var(--steel);
+    border-radius:2px;
+    margin-bottom:10px;
+    cursor:pointer;
+  }
+  .checkbox-row:hover{border-color:var(--ash);}
+  .checkbox-row input{width:18px; height:18px; margin-top:1px; accent-color:var(--rust-bright);}
+  .checkbox-row span{font-size:14px; line-height:1.4; color:var(--bone);}
+
+  .disclaimer{
+    font-size:12px;
+    color:var(--ash);
+    line-height:1.6;
+    margin-top:28px;
+    padding-top:18px;
+    border-top:1px solid var(--steel);
+  }
+
+  /* RESULTS */
+  .score-wrap{display:flex; flex-direction:column; align-items:center; margin-bottom:28px;}
+  .gauge{position:relative; width:220px; height:130px;}
+  .gauge svg{width:220px; height:130px;}
+  .gauge-num{
+    position:absolute;
+    bottom:6px;
+    left:0; right:0;
+    text-align:center;
+    font-family:var(--font-mono);
+    font-weight:700;
+    font-size:42px;
+    color:var(--bone);
+  }
+  .gauge-num span{font-size:16px; color:var(--ash); font-weight:400;}
+  .gauge-caption{
+    font-family:var(--font-body);
+    font-weight:500;
+    font-size:12px;
+    color:var(--ash);
+    margin-top:6px;
+  }
+  .tier-badge{
+    display:inline-block;
+    font-family:var(--font-body);
+    font-weight:600;
+    font-size:12px;
+    padding:5px 12px;
+    border:1px solid var(--rust-bright);
+    color:var(--rust-bright);
+    border-radius:2px;
+    margin-bottom:16px;
+    align-self:flex-start;
+  }
+
+  .banner-offer{
+    background:#F0F6FF;
+    border:2px solid var(--rust-bright);
+    border-radius:2px;
+    padding:20px 18px;
+    margin-bottom:28px;
+  }
+  .banner-offer-eyebrow{
+    font-family:var(--font-mono);
+    font-size:11px;
+    letter-spacing:0;
+    color:var(--rust-bright);
+    font-weight:500;
+    margin-bottom:12px;
+    display:flex;
+    align-items:center;
+    gap:7px;
+  }
+  .banner-offer-eyebrow::before{
+    content:'';
+    width:5px;
+    height:5px;
+    border-radius:50%;
+    background:var(--rust-bright);
+    flex-shrink:0;
+  }
+
+  .scale-wrap{margin:22px 0 28px;}
+  .scale-label{
+    font-family:var(--font-body);
+    font-weight:500;
+    font-size:12px;
+    color:var(--ash);
+    margin-bottom:10px;
+  }
+  .scale-track{
+    position:relative;
+    height:10px;
+    border-radius:6px;
+    overflow:visible;
+    display:flex;
+  }
+  .scale-zone{height:100%;}
+  .scale-zone:first-child{border-radius:6px 0 0 6px;}
+  .scale-zone:last-child{border-radius:0 6px 6px 0;}
+  .scale-marker{
+    position:absolute;
+    top:-8px;
+    width:2px;
+    height:26px;
+    background:var(--bone);
+  }
+  .scale-marker::after{
+    content:attr(data-label);
+    position:absolute;
+    top:-24px;
+    left:50%;
+    transform:translateX(-50%);
+    font-family:var(--font-mono);
+    font-size:11px;
+    font-weight:700;
+    color:var(--bone);
+    white-space:nowrap;
+  }
+  .scale-zone-labels{
+    display:flex;
+    justify-content:space-between;
+    margin-top:8px;
+    font-family:var(--font-body);
+    font-size:11px;
+    font-weight:500;
+    color:var(--ash);
+  }
+  .result-headline{
+    font-family:var(--font-display);
+    font-weight:700;
+    font-size:28px;
+    line-height:1.15;
+    margin-bottom:16px;
+  }
+  .result-body{font-size:15px; line-height:1.65; color:var(--bone); margin-bottom:8px;}
+  .result-body strong{color:var(--rust-bright);}
+  .cta-block{
+    margin-top:30px;
+    padding:24px 20px;
+    background:var(--steel);
+    border-radius:2px;
+    border-left:3px solid var(--rust-bright);
+  }
+  .cta-block h4{font-family:var(--font-display); font-size:19px; margin-bottom:10px;}
+  .cta-block p{font-size:14px; color:var(--ash); line-height:1.6; margin-bottom:18px;}
+  .bump{
+    margin-top:16px;
+    padding:16px 18px;
+    border:1px dashed var(--ash);
+    border-radius:2px;
+  }
+  .bump label{display:flex; gap:12px; align-items:flex-start; cursor:pointer;}
+  .bump input{width:18px; height:18px; margin-top:2px; accent-color:var(--rust-bright);}
+  .bump .bump-title{font-weight:600; font-size:14px; margin-bottom:4px;}
+  .bump .bump-copy{font-size:13px; color:var(--ash); line-height:1.5;}
+
+  .hidden{display:none !important;}
+
+  @media (max-width:420px){
+    h1.hero{font-size:32px;}
+    h2.q{font-size:22px;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="brand">
+    <span><strong>MUSCLE DEBT SCORE</strong></span>
+    <span id="brandStep" class="step-count"></span>
+  </div>
+
+  <div class="progress-track" id="progressTrack"><div class="progress-fill" id="progressFill"></div></div>
+  <div class="progress-label" id="progressLabel"></div>
+
+  <div class="screen" id="screen"></div>
+
+</div>
+
+<script>
+/* ============================================================
+   MUSCLE DEBT SCORE — quiz engine
+   Three branches: glp1 / surgery / natural
+   All formulas and copy transcribed from the approved build doc.
+   ============================================================ */
+
+const KTAW_CHECKOUT_URL = "https://kgm.thrivecart.com/ktaw/";
+const KTAW_PRICE = 497;
+
+// Kit (ConvertKit) lead capture — calls our own Netlify Function, which holds
+// the real Kit API key privately (set in Netlify's environment variables,
+// never in this file). The browser never talks to Kit directly, and the key
+// never appears anywhere a visitor could view page source and steal it.
+async function submitToKit(name, email, branch, gated, resultsURL){
+  try{
+    await fetch('/.netlify/functions/kit-tag', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, email, branch, gated, resultsURL })
+    });
+  }catch(err){
+    console.warn('Kit submission failed silently — do not block the user on this:', err);
+  }
+}
+
+let state = {
+  branch: null,
+  step: 0,
+  answers: {},
+  gated: false
+};
+
+const screenEl = document.getElementById('screen');
+const progressTrack = document.getElementById('progressTrack');
+const progressFill = document.getElementById('progressFill');
+const progressLabel = document.getElementById('progressLabel');
+const brandStep = document.getElementById('brandStep');
+
+function setProgress(current, total, label){
+  if(total === 0){
+    progressTrack.classList.remove('show');
+    progressLabel.classList.remove('show');
+    brandStep.textContent = '';
+    return;
+  }
+  progressTrack.classList.add('show');
+  progressLabel.classList.add('show');
+  progressFill.style.width = Math.round((current/total)*100) + '%';
+  progressLabel.textContent = label || `Set ${current} / ${total}`;
+  brandStep.textContent = `${current}/${total}`;
+}
+
+/* ---------------- QUESTION DEFINITIONS ---------------- */
+
+const branches = {
+  glp1: {
+    name: "GLP-1 Medication",
+    questions: [
+      { key:'sex', q:'What\u2019s your sex?', context:'Muscle loss patterns differ by sex \u2014 this keeps your number specific to you, not generic.', type:'choice', options:[['male','Male'],['female','Female']] },
+      { key:'age', q:'What\u2019s your age?', context:'The body holds onto muscle differently at 25 than at 55. This adjusts for that, not around it.', type:'number', placeholder:'e.g. 42', suffix:'yrs' },
+      { key:'preWeight', q:'What was your weight before you started losing it?', context:'The number before the change started.', type:'number', placeholder:'e.g. 210', suffix:'lbs' },
+      { key:'currentWeight', q:'What\u2019s your current weight?', context:'And where you landed. The gap between these two is where the real story is.', type:'number', placeholder:'e.g. 165', suffix:'lbs' },
+      { key:'medication', q:'Which medication have you been using, if any?', context:'Different medications pull lean mass at different rates in published trials \u2014 this is where we adjust for which one.', type:'choice', options:[
+          ['semaglutide','Semaglutide (Ozempic / Wegovy)'],
+          ['tirzepatide','Tirzepatide (Mounjaro / Zepbound)'],
+          ['unsure','Not sure']
+        ]},
+      { key:'months', q:'About how many months has most of this weight loss happened over?', context:'Speed matters as much as amount. Losing it fast costs more muscle than losing it slow, even at the same total.', type:'number', placeholder:'e.g. 8', suffix:'months' },
+      { key:'training', q:'During your weight loss, how often did you do resistance/strength training?', context:'This is the single biggest lever in how much of what you lost was muscle versus fat.', type:'choice', options:[
+          ['regular','Regularly \u2014 3+ times a week'],
+          ['some','Sometimes \u2014 1-2 times a week'],
+          ['none','Not at all']
+        ]},
+      { key:'protein', q:'How would you describe your protein intake during your weight loss?', context:'Protein is the second-biggest lever after training \u2014 published trials show it meaningfully changes how much of what you lose is muscle.', type:'choice', options:[
+          ['high','High \u2014 I tracked it or made it a priority'],
+          ['moderate','Moderate \u2014 ate reasonably, didn\u2019t really track'],
+          ['low','Low \u2014 didn\u2019t think about it much']
+        ]},
+      { key:'sleep', q:'During this stretch, how would you describe your sleep?', context:'Sleep affects muscle protein synthesis as much as training does \u2014 short sleep changes the ratio of what you lose, even at the exact same total weight.', type:'choice', options:[
+          ['good','Consistently 7+ hours'],
+          ['moderate','Usually 6-7 hours'],
+          ['poor','Regularly under 6 hours']
+        ]}
+    ],
+    gate: {
+      q:'Any of these currently true for you?',
+      context:'Nothing here unlocks or blocks your result. It just makes sure what we hand you afterward is actually safe for you.',
+      type:'multi',
+      noneKey:'none',
+      options:[
+        ['pregnant','Pregnant or trying to conceive'],
+        ['fainting','Recent fainting, dizziness, or severe GI symptoms'],
+        ['eatingdisorder','History of an eating disorder'],
+        ['restricted','A doctor has restricted my activity level'],
+        ['none','None of these apply']
+      ]
+    }
+  },
+  surgery: {
+    name: "Cosmetic Surgery",
+    questions: [
+      { key:'sex', q:'What\u2019s your sex?', context:'Muscle loss patterns differ by sex \u2014 this keeps your number specific to you, not generic.', type:'choice', options:[['male','Male'],['female','Female']] },
+      { key:'age', q:'What\u2019s your age?', context:'Older bodies lose muscle faster during any period of reduced movement. This adjusts for that.', type:'number', placeholder:'e.g. 42', suffix:'yrs' },
+      { key:'currentWeight', q:'What\u2019s your current weight?', context:'Used to estimate your starting muscle mass \u2014 the baseline everything else is measured against.', type:'number', placeholder:'e.g. 165', suffix:'lbs' },
+      { key:'restriction', q:'How limited was your activity after your procedure?', context:'This is the actual driver here \u2014 not the surgery itself, but how long your body stayed still afterward.', type:'choice', options:[
+          ['minimal','Minimal \u2014 walking normally within days'],
+          ['moderate','Moderate \u2014 limited exertion for 1-3 weeks'],
+          ['significant','Significant \u2014 mostly resting for 3+ weeks']
+        ]},
+      { key:'weeksSince', q:'How many weeks ago was your procedure?', context:'How long ago this happened, so we know how far into recovery your body actually is.', type:'number', placeholder:'e.g. 6', suffix:'weeks' },
+      { key:'protein', q:'How would you describe your protein intake during recovery?', context:'Protein drives tissue repair as much as it drives muscle retention \u2014 this matters here too, not just for people dieting.', type:'choice', options:[
+          ['high','High \u2014 I tracked it or made it a priority'],
+          ['moderate','Moderate \u2014 ate reasonably, didn\u2019t really track'],
+          ['low','Low \u2014 didn\u2019t think about it much']
+        ]},
+      { key:'sleep', q:'During recovery, how would you describe your sleep?', context:'Poor sleep measurably slows tissue repair and muscle retention \u2014 this matters during recovery just as much as during a diet.', type:'choice', options:[
+          ['good','Consistently 7+ hours'],
+          ['moderate','Usually 6-7 hours'],
+          ['poor','Regularly under 6 hours']
+        ]},
+      { key:'clearance', q:'Has your surgeon cleared you for exercise?', context:'This one matters most \u2014 it decides what we recommend next, not just what we calculate.', type:'choice', options:[
+          ['yes','Yes'],['no','No'],['unsure','Not sure']
+        ]}
+    ],
+    gate: null // clearance question above doubles as the gate
+  },
+  natural: {
+    name: "Proper Nutrition & Exercise",
+    questions: [
+      { key:'sex', q:'What\u2019s your sex?', context:'Muscle loss patterns differ by sex \u2014 this keeps your number specific to you, not generic.', type:'choice', options:[['male','Male'],['female','Female']] },
+      { key:'age', q:'What\u2019s your age?', context:'The body holds onto muscle differently at 25 than at 55. This adjusts for that, not around it.', type:'number', placeholder:'e.g. 42', suffix:'yrs' },
+      { key:'preWeight', q:'What was your weight before you started losing it?', context:'The number before the change started.', type:'number', placeholder:'e.g. 210', suffix:'lbs' },
+      { key:'currentWeight', q:'What\u2019s your current weight?', context:'And where you landed. The gap between these two is where the real story is.', type:'number', placeholder:'e.g. 165', suffix:'lbs' },
+      { key:'months', q:'About how many months did this weight loss happen over?', context:'Speed matters as much as amount. Losing it fast costs more muscle than losing it slow, even at the same total.', type:'number', placeholder:'e.g. 10', suffix:'months' },
+      { key:'training', q:'During your weight loss, how often did you do resistance/strength training?', context:'This is the single biggest lever in how much of what you lost was muscle versus fat.', type:'choice', options:[
+          ['regular','Regularly \u2014 3+ times a week'],
+          ['some','Sometimes \u2014 1-2 times a week'],
+          ['none','Not at all']
+        ]},
+      { key:'protein', q:'How would you describe your protein intake during your weight loss?', context:'Protein is the second-biggest lever after training \u2014 published trials show it meaningfully changes how much of what you lose is muscle.', type:'choice', options:[
+          ['high','High \u2014 I tracked it or made it a priority'],
+          ['moderate','Moderate \u2014 ate reasonably, didn\u2019t really track'],
+          ['low','Low \u2014 didn\u2019t think about it much']
+        ]},
+      { key:'sleep', q:'During this stretch, how would you describe your sleep?', context:'Sleep affects muscle protein synthesis as much as training does \u2014 short sleep changes the ratio of what you lose, even at the exact same total weight.', type:'choice', options:[
+          ['good','Consistently 7+ hours'],
+          ['moderate','Usually 6-7 hours'],
+          ['poor','Regularly under 6 hours']
+        ]}
+    ],
+    gate: {
+      q:'Any of these currently true for you?',
+      context:'Nothing here unlocks or blocks your result. It just makes sure what we hand you afterward is actually safe for you.',
+      type:'multi',
+      noneKey:'none',
+      options:[
+        ['pregnant','Pregnant or trying to conceive'],
+        ['injury','Recent injury or doctor-restricted activity'],
+        ['eatingdisorder','History of an eating disorder'],
+        ['fainting','Fainting or dizziness with exertion'],
+        ['none','None of these apply']
+      ]
+    }
+  }
+};
+
+/* ---------------- FORMULAS ---------------- */
+
+// Age multiplier: muscle retention gets harder with age (anabolic resistance
+// begins accelerating in the 40s, more sharply past 60 — Cleveland Clinic,
+// sarcopenia literature)
+function ageMult(age){
+  if(age >= 60) return 1.20;
+  if(age >= 40) return 1.10;
+  return 1.0;
+}
+
+// Rate-of-loss multiplier: slower weight loss preserves lean mass better
+// than rapid loss at the same total (Garthe et al. 2011; BJN 2020 meta-analysis)
+function rateMult(totalLost, months){
+  if(!months || months <= 0) return 1.0;
+  const perWeek = totalLost / (months * 4.33);
+  if(perWeek < 1) return 0.85;
+  if(perWeek <= 2) return 1.0;
+  return 1.20;
+}
+
+// Protein multiplier: higher protein intake (1.0-1.6 g/kg/day vs ~0.8 g/kg/day
+// normal) meaningfully preserves lean mass during a deficit or recovery window
+// (Ogilvie et al. 2022; Longland et al. 2016; multiple meta-analyses)
+function proteinMult(protein){
+  if(protein === 'high') return 0.75;
+  if(protein === 'low') return 1.15;
+  return 1.0;
+}
+
+// Sleep multiplier: a controlled crossover trial found identical caloric
+// deficits produced very different results depending on sleep — 5.5h vs 8.5h
+// nightly sleep cut fat loss by 55% and increased lean mass loss by 60% for
+// the exact same total weight lost (Nedeltcheva et al. 2010, Annals of
+// Internal Medicine; replicated in Wang et al. 2018; mechanism confirmed via
+// acute drops in muscle protein synthesis, Lamon et al. 2021)
+function sleepMult(sleep){
+  if(sleep === 'good') return 0.85;
+  if(sleep === 'poor') return 1.25;
+  return 1.0;
+}
+
+function calcGLP1(a){
+  const total = a.preWeight - a.currentWeight;
+  let base = a.medication === 'semaglutide' ? 0.40 : a.medication === 'tirzepatide' ? 0.25 : 0.32;
+  let trainMult = a.training === 'regular' ? 0.35 : a.training === 'some' ? 0.65 : 1.0;
+  let rMult = rateMult(total, a.months);
+  let aMult = ageMult(a.age);
+  let pMult = proteinMult(a.protein);
+  let sMult = sleepMult(a.sleep);
+  let lost = total * base * trainMult * rMult * aMult * pMult * sMult;
+  let pct = total > 0 ? (lost/total)*100 : 0;
+  pct = Math.min(pct, 60); // sanity ceiling — stacked multipliers shouldn't imply impossible loss
+  lost = total * (pct/100);
+  let score = Math.min(100, (pct/45)*100);
+  return { lost: Math.round(lost), score: Math.round(score) };
+}
+
+function calcSurgery(a){
+  const baselineMuscle = a.currentWeight * (a.sex === 'male' ? 0.40 : 0.32);
+  let dailyRate = a.restriction === 'minimal' ? 0.0015 : a.restriction === 'moderate' ? 0.0035 : 0.0055;
+  let aMult = ageMult(a.age);
+  let pMult = proteinMult(a.protein);
+  let sMult = sleepMult(a.sleep);
+  let pct = Math.min(18, dailyRate * aMult * pMult * sMult * a.weeksSince * 7 * 100);
+  let lost = baselineMuscle * (pct/100);
+  let score = Math.min(100, (pct/18)*100);
+  return { lost: Math.round(lost), score: Math.round(score) };
+}
+
+function calcNatural(a){
+  const total = a.preWeight - a.currentWeight;
+  let trainMult = a.training === 'regular' ? 0.35 : a.training === 'some' ? 0.65 : 1.0;
+  let rMult = rateMult(total, a.months);
+  let aMult = ageMult(a.age);
+  let pMult = proteinMult(a.protein);
+  let sMult = sleepMult(a.sleep);
+  let lost = total * 0.25 * trainMult * rMult * aMult * pMult * sMult;
+  let pct = total > 0 ? (lost/total)*100 : 0;
+  pct = Math.min(pct, 60);
+  lost = total * (pct/100);
+  let score = Math.min(100, (pct/25)*100);
+  return { lost: Math.round(lost), score: Math.round(score) };
+}
+
+function tierOf(score){
+  if(score < 25) return 1;
+  if(score < 50) return 2;
+  if(score < 75) return 3;
+  return 4;
+}
+
+/* ---------------- RESULT COPY ---------------- */
+
+const copy = {
+  glp1: {
+    1:{badge:'Minimal Debt', headline:'Your Muscle Debt is real, but small. This is the moment to close it.',
+       body:(x)=>`You caught this early. Whatever training and protein you had running protected what matters \u2014 an estimated <strong>${x} lbs</strong>, on the low end. Minimal doesn't mean none, and the trajectory of GLP-1-driven loss doesn't reverse on its own. This is the cheapest point in the entire process to act. Waiting doesn't hold the number still \u2014 it grows it.`},
+    2:{badge:'Moderate Debt', headline:'A real Muscle Debt. Still fully recoverable, if you move now.',
+       body:(x)=>`An estimated <strong>${x} lbs</strong>. This is where most people land, and where most people decide to deal with it later. Later is when moderate becomes high. You still have most of what you need to work with \u2014 this is rebuild territory, not damage control. The window narrows the longer it stays open.`},
+    3:{badge:'High Debt', headline:'This has moved past aesthetics.',
+       body:(x)=>`Our estimate: <strong>${x} lbs</strong>. Strength, metabolic rate, and your ability to keep the weight off are directly tied to what you've lost. Not a reason to panic. A reason to stop treating this as optional. The body responds fast to correctly structured resistance training, even from here \u2014 but fast still requires starting.`},
+    4:{badge:'Severe Debt', headline:'This is the number behind why the scale and the mirror disagree.',
+       body:(x)=>`Estimated <strong>${x} lbs</strong>. Severe Muscle Debt means a significant share of what you lost wasn't fat \u2014 and it's very likely why you feel weaker or more fatigued than the scale suggests. Not permanent. Not your fault. The direct cost of rapid loss without resistance work behind it. It compounds the longer it sits.`}
+  },
+  surgery: {
+    1:{badge:'Minimal Debt', headline:'Your recovery protected more than most.',
+       body:(x)=>`Estimated <strong>${x} lbs</strong>, on the low end. Whatever restrictions you followed, your body held onto most of what it started with. The easiest kind of Muscle Debt to close completely \u2014 but the window for easy is shorter than expected once normal activity resumes.`},
+    2:{badge:'Moderate Debt', headline:'Recovery cost more than it looks like from the outside.',
+       body:(x)=>`Roughly <strong>${x} lbs</strong> \u2014 standard for the restriction level most procedures require. Disuse atrophy doesn't announce itself, it happens while you're focused on healing. Past the point where rest alone helps. Fully rebuildable, with deliberate, structured loading.`},
+    3:{badge:'High Debt', headline:'Your recovery period took a measurable toll.',
+       body:(x)=>`Estimate: <strong>${x} lbs</strong>. Extended restriction protects what you paid for \u2014 at a cost nobody puts on the invoice. This level is why results can look less defined than expected once swelling resolves. Not the procedure's failure. What happened underneath it while you were still.`},
+    4:{badge:'Severe Debt', headline:'A significant recovery protocol. A significant cost.',
+       body:(x)=>`Estimated <strong>${x} lbs</strong>. Common after longer or more restrictive timelines. Not a reflection of anything done wrong \u2014 stillness heals the surgical site and lets muscle go, simultaneously. Not permanent. Requires a program built specifically around returning to load carefully.`}
+  },
+  natural: {
+    1:{badge:'Minimal Debt', headline:'You protected your muscle better than most manage on a deficit.',
+       body:(x)=>`Estimated <strong>${x} lbs</strong> \u2014 low. Proof the approach worked. Minimal Muscle Debt is easy to close the rest of the way, especially from a starting point this strong.`},
+    2:{badge:'Moderate Debt', headline:'Some progress came at muscle\u2019s expense \u2014 the common cost of a plan without enough precision.',
+       body:(x)=>`An estimated <strong>${x} lbs</strong>. The most typical outcome for genuine effort without training and protein dialed to match the deficit. Reflects a gap in the plan. Not the person.`},
+    3:{badge:'High Debt', headline:'A significant share of your loss was muscle, not fat.',
+       body:(x)=>`Estimate: <strong>${x} lbs</strong>. The exact pattern behind "skinny fat" after real effort. Also a major driver of regain \u2014 less muscle means a slower metabolism working against you daily.`},
+    4:{badge:'Severe Debt', headline:'A serious level. Very likely why results haven\u2019t matched effort.',
+       body:(x)=>`Estimated <strong>${x} lbs</strong>. The deficit took a real toll, probably because training and protein weren't structured tightly enough to match how much came off. Fixable \u2014 often faster than expected, once the plan protects muscle instead of just chasing the scale.`}
+  }
+};
+
+/* ---------------- PREVIEW COPY (shown before lead capture) ---------------- */
+
+function previewCopy(branch, a){
+  let clauses = [];
+
+  if(branch === 'glp1'){
+    if(a.medication === 'semaglutide') clauses.push("semaglutide pulls a meaningfully higher share of lean mass than other GLP-1s in published trials");
+    else if(a.medication === 'tirzepatide') clauses.push("tirzepatide tends to preserve more lean mass than other GLP-1s in published trials, though it's not immune to this");
+    else clauses.push("not knowing exactly which medication doesn't change that this is a real, measurable pattern");
+
+    if(a.training === 'regular') clauses.push("the training you kept up during your loss is doing real work to protect against it");
+    else if(a.training === 'some') clauses.push("the training you did part of the time only partially offset it");
+    else clauses.push("without resistance training in the picture, there was nothing telling your body to hold onto that tissue");
+
+    if(a.protein === 'low') clauses.push("and protein wasn't a priority, which tends to compound the effect");
+    if(a.sleep === 'poor') clauses.push("and short sleep during this stretch tends to shift the ratio further toward muscle, not just fat");
+    if(a.age >= 40) clauses.push("and past 40, this effect compounds faster than most people realize");
+  }
+
+  if(branch === 'natural'){
+    clauses.push("you did this through actual effort, not a shortcut");
+    if(a.training === 'regular') clauses.push("and the training you kept up is doing real work to protect your muscle");
+    else if(a.training === 'some') clauses.push("and partial training only partially offset the deficit's effect on muscle");
+    else clauses.push("and without resistance training, the deficit had nothing telling it to spare muscle over fat");
+    if(a.protein === 'low') clauses.push("protein wasn't a priority either, which tends to compound it");
+    if(a.sleep === 'poor') clauses.push("and short sleep during this stretch tends to shift the ratio further toward muscle, not just fat");
+  }
+
+  if(branch === 'surgery'){
+    if(a.restriction === 'significant') clauses.push("the extended time your body spent still after your procedure is the real driver here, not the surgery itself");
+    else if(a.restriction === 'moderate') clauses.push("the few weeks of limited activity after your procedure left a mark, even if it doesn't feel like it yet");
+    else clauses.push("staying mobile early worked in your favor, even if some effect is still there");
+    if(a.protein === 'low') clauses.push("and protein wasn't a priority during recovery, which slows how fast this reverses");
+    if(a.sleep === 'poor') clauses.push("and short sleep during recovery measurably slows tissue repair on top of that");
+  }
+
+  const joined = clauses.join(', ');
+  return `Ok \u2014 based on what you told us: ${joined}. That's not a guess. That's read directly off your own numbers.`;
+}
+
+/* ---------------- OFFER COPY (agitate + stack, direct-response) ---------------- */
+
+const skeleton = [
+  `Real resistance training. Not walking, not cardio \u2014 actual load your muscles have to work against, or they have no reason to rebuild.`,
+  `Enough protein to give your body the raw material to rebuild with. Training without fuel is just wearing yourself out.`,
+  `Consistency over intensity. Short, frequent signals to your body beat occasional heroic efforts, every time.`,
+  `A defined timeline \u2014 not "someday," an actual arc your body can adapt along. Six weeks is enough for real change to show up, if it's structured right.`,
+  `Recovery built in, not bolted on. Muscle isn't built during the workout. It's built in the days after it, when it's given the chance to actually repair.`
+];
+const skeletonReveal = `There's a program built around exactly those five things \u2014 nothing else, nothing extra, nothing to distract from paying the debt down.`;
+
+const ktawBenefits = [
+  `Resistance training that follows real movement patterns, not random exercises. Three full-body days a week \u2014 squat, hinge, press, row, carry.`,
+  `The Atlas Swing Block \u2014 4 sets of 20, every session, non-negotiable. The single highest-output movement in the program, and it never gets watered down.`,
+  `Two Core-Steps days a week, plus a daily 10,000\u201312,000 step floor. Recovery is structured and active, not an afterthought.`,
+  `Six weeks, three defined blocks \u2014 Foundation & Rhythm, Intensification & Density, Mastery & Conditioning. A specific start, a specific progression, a specific finish line.`,
+  `Superman Hold and Quadruped Breathing to close every session \u2014 recovery programmed in, not left to chance.`,
+  `Never held a kettlebell, or starting from a GLP-1, a surgical recovery, or no training history at all? The Atlas On-Ramp meets you exactly where you are first \u2014 no deep end, no guessing.`,
+  `Delivered straight to your phone through the KTAW Hub. No gym to drive to, no membership to cancel later.`
+];
+
+const offerCopy = {
+  glp1: {
+    letter: [
+      `Your Muscle Debt Score is in.`,
+      `You didn't take this lightly. The medication isn't cheap, the commitment wasn't small, and the scale moved because you made it move.`,
+      `Here's what wasn't on the invoice: the drug doesn't distinguish between the weight you wanted gone and the muscle you needed to keep. It pulls from both, indiscriminately. What you're looking at above is that unpaid difference \u2014 the tissue that came off alongside the fat, without your permission.`,
+      `Left alone, this is why the number on the scale can say "success" while your reflection disagrees. It's also why the weight tends to return once the medication stops \u2014 less muscle means a body with less capacity to spend the calories you're accustomed to.`,
+      `I built Kettlebellin': The Atlas Way for exactly one kind of person \u2014 someone who already proved they invest in results, not excuses. Not a facility. Not software. Six weeks, three kettlebells, and a program built by someone who's paid this exact debt down himself.`
+    ]
+  },
+  surgery: {
+    letter: [
+      `Your Muscle Debt Score is in.`,
+      `You made a decision most people talk themselves out of, and you followed the restrictions your surgeon gave you to the letter. That kind of discipline isn't common.`,
+      `Here's what recovery costs that nobody itemizes: the less a muscle moves, the faster it disappears. Weeks of restricted activity, done exactly right, still means real tissue quietly leaving while you're focused on healing everything else. That's your Muscle Debt \u2014 not a sign anything went wrong, just the documented price of the stillness recovery required.`,
+      `Left alone, this is why results people paid real money to protect can end up looking softer than expected once the swelling resolves. Not because the procedure failed. Because what's underneath it went quiet while you were healing.`,
+      `I built Kettlebellin': The Atlas Way for the kind of person who already invested in getting this right once and isn't interested in leaving it half-finished. Six weeks, three kettlebells, a program that respects exactly where you're starting from.`
+    ]
+  },
+  natural: {
+    letter: [
+      `Your Muscle Debt Score is in.`,
+      `You did this without a shortcut. No medication, no procedure \u2014 discipline against your own appetite, sustained. I know exactly what that costs, because I lost 71 pounds the same way.`,
+      `A calorie deficit doesn't discriminate. Without resistance training and protein precise enough to protect it, your body spends muscle right alongside fat \u2014 often close to a quarter of everything lost. That's your Muscle Debt: real tissue spent to fund a number on a scale, whether you agreed to that trade or not.`,
+      `Left unpaid, this is why people who did everything right still end up smaller without being stronger. It's also why the weight tends to find its way back \u2014 less muscle means less capacity to spend the calories you're used to, every day, indefinitely.`,
+      `I didn't have a plan for this when I needed one. Kettlebellin': The Atlas Way is built for someone who's proven they finish what they start and wants the same precision applied to what comes next. Six weeks, three kettlebells, a program built by someone who paid this debt down the same way you're about to.`
+    ]
+  }
+};
+
+/* ---------------- RENDER ---------------- */
+
+function render(){
+  window.scrollTo(0,0);
+  if(state.step === 'landing') return renderLanding();
+  if(state.step === 'branchSelect') return renderBranchSelect();
+  if(state.step === 'gate') return renderGate();
+  if(state.step === 'lead') return renderLead();
+  if(state.step === 'results') return renderResults();
+  if(typeof state.step === 'number') return renderQuestion();
+}
+
+function renderLanding(){
+  setProgress(0,0);
+  screenEl.innerHTML = `
+    <div class="eyebrow" style="margin-bottom:14px;">Free 2-Minute Assessment</div>
+    <h1 class="hero">You Didn't Just Lose Weight. You Went Into <span class="accent">Muscle Debt.</span></h1>
+    <p class="sub">Whether it came off from a GLP-1, a surgeon's table, or the hard way \u2014 some of what you lost wasn't fat. It was muscle. Most people don't find out how much until it's already hard to get back. Find your number in under 2 minutes.</p>
+    <div style="border-left:2px solid var(--rust-bright); padding:14px 16px; margin-bottom:26px; background:var(--steel);">
+      <p style="font-size:13px; line-height:1.6; color:var(--ash);"><strong style="color:var(--bone);">Muscle Debt, in plain terms:</strong> when you lose weight, your body doesn't only burn fat — it burns some muscle too, whether you meant it to or not. That muscle is Muscle Debt. Left unpaid, it's why the scale can say "success" while the mirror doesn't — and why the weight has a way of finding its way back.</p>
+    </div>
+    <button class="btn" id="startBtn">Calculate My Muscle Debt Score</button>
+    <p style="font-size:12px; color:var(--ash); margin-top:12px; text-align:center;">Takes 2 minutes. You'll get your full score and what's driving it \u2014 free.</p>
+  `;
+  document.getElementById('startBtn').onclick = ()=>{ state.step='branchSelect'; render(); };
+}
+
+function renderBranchSelect(){
+  setProgress(0,0);
+  screenEl.innerHTML = `
+    <div class="eyebrow">Step 1</div>
+    <h2 class="q">What got you here?</h2>
+    <p class="sub" style="margin-bottom:22px; font-size:14px;">Muscle Debt happens differently depending on how the weight came off. Pick the one that matches your path \u2014 everything after this is tailored to it.</p>
+    <div class="branch-card" data-b="glp1"><h3>GLP-1 Medication</h3><p>Ozempic, Wegovy, Mounjaro, Zepbound, or similar</p></div>
+    <div class="branch-card" data-b="surgery"><h3>Cosmetic Surgery</h3><p>Recovery from a surgical procedure</p></div>
+    <div class="branch-card" data-b="natural"><h3>Proper Nutrition & Exercise</h3><p>No medication, no procedure \u2014 just diet and training</p></div>
+    <p style="font-size:12px; color:var(--ash); margin-top:16px; text-align:center;">Takes 2 minutes either way. Just answer for the path that's actually yours.</p>
+  `;
+  screenEl.querySelectorAll('.branch-card').forEach(el=>{
+    el.onclick = ()=>{
+      state.branch = el.dataset.b;
+      state.answers = {};
+      state.step = 0;
+      render();
+    };
+  });
+}
+
+function currentQuestions(){ return branches[state.branch].questions; }
+
+function renderQuestion(){
+  const qs = currentQuestions();
+  const q = qs[state.step];
+  setProgress(state.step+1, qs.length);
+
+  let inner = '';
+  if(q.type === 'choice'){
+    inner = `<div class="option-list">` + q.options.map(([val,label])=>
+      `<button class="option" data-val="${val}">${label}</button>`
+    ).join('') + `</div>`;
+  } else if(q.type === 'number'){
+    inner = `
+      <div style="position:relative;">
+        <input type="number" inputmode="decimal" id="numInput" placeholder="${q.placeholder}" style="padding-right:60px;">
+        <span style="position:absolute; right:16px; top:50%; transform:translateY(-50%); font-family:var(--font-mono); font-size:12px; color:var(--ash); text-transform:uppercase;">${q.suffix || ''}</span>
+      </div>
+      <button class="btn" id="nextBtn">Continue</button>
+    `;
+  }
+
+  screenEl.innerHTML = `
+    <div class="eyebrow">${branches[state.branch].name}</div>
+    <h2 class="q">${q.q}</h2>
+    <p class="sub" style="margin-bottom:22px; font-size:14px;">${q.context}</p>
+    ${inner}
+    ${state.step > 0 ? `<button class="btn ghost" id="backBtn" style="margin-top:12px;">Back</button>` : ''}
+  `;
+
+  if(state.step > 0){
+    document.getElementById('backBtn').onclick = ()=>{
+      state.step -= 1;
+      render();
+    };
+  }
+
+  if(q.type === 'choice'){
+    screenEl.querySelectorAll('.option').forEach(el=>{
+      if(state.answers[q.key] === el.dataset.val) el.classList.add('selected');
+      el.onclick = ()=>{
+        state.answers[q.key] = el.dataset.val;
+        advance();
+      };
+    });
+  } else {
+    const input = document.getElementById('numInput');
+    if(state.answers[q.key] != null) input.value = state.answers[q.key];
+    input.focus();
+    const go = ()=>{
+      const v = parseFloat(input.value);
+      if(!v || v<=0) { input.style.borderColor = 'var(--rust-bright)'; return; }
+      state.answers[q.key] = v;
+      advance();
+    };
+    document.getElementById('nextBtn').onclick = go;
+    input.addEventListener('keydown', e=>{ if(e.key==='Enter') go(); });
+  }
+}
+
+function advance(){
+  const qs = currentQuestions();
+  if(state.step + 1 < qs.length){
+    state.step += 1;
+  } else {
+    // finished questions -> gate (surgery branch's gate is the clearance question already asked)
+    if(state.branch === 'surgery'){
+      state.gated = state.answers.clearance !== 'yes';
+      state.step = 'lead';
+    } else {
+      state.step = 'gate';
+    }
+  }
+  render();
+}
+
+function renderGate(){
+  setProgress(0,0);
+  const g = branches[state.branch].gate;
+  screenEl.innerHTML = `
+    <div class="eyebrow">Almost there</div>
+    <h2 class="q">${g.q}</h2>
+    <p class="sub" style="margin-bottom:22px; font-size:14px;">${g.context}</p>
+    <div id="gateOptions">
+      ${g.options.map(([val,label])=>`
+        <label class="checkbox-row">
+          <input type="checkbox" value="${val}" ${g.noneKey && val===g.noneKey ? 'data-none="1"' : ''}>
+          <span>${label}</span>
+        </label>
+      `).join('')}
+    </div>
+    <button class="btn" id="gateNext" style="margin-top:10px;">Continue</button>
+    <button class="btn ghost" id="gateBack" style="margin-top:10px;">Back</button>
+  `;
+  document.getElementById('gateBack').onclick = ()=>{
+    state.step = currentQuestions().length - 1;
+    render();
+  };
+  const boxes = Array.from(document.querySelectorAll('#gateOptions input'));
+  boxes.forEach(box=>{
+    box.addEventListener('change', ()=>{
+      if(box.dataset.none === '1' && box.checked){
+        boxes.forEach(b=>{ if(b !== box) b.checked = false; });
+      } else if(box.checked){
+        const noneBox = boxes.find(b=>b.dataset.none === '1');
+        if(noneBox) noneBox.checked = false;
+      }
+    });
+  });
+  document.getElementById('gateNext').onclick = ()=>{
+    const checked = Array.from(document.querySelectorAll('#gateOptions input:checked'))
+      .filter(b=>b.dataset.none !== '1');
+    state.gated = checked.length > 0;
+    state.step = 'lead';
+    render();
+  };
+}
+
+function renderLead(){
+  setProgress(0,0);
+  const preview = previewCopy(state.branch, state.answers);
+  screenEl.innerHTML = `
+    <div class="eyebrow">Here's what we're seeing</div>
+    <p class="result-body" style="font-size:16px; margin-bottom:24px;">${preview}</p>
+    <h2 class="q" style="font-size:22px;">Where should we send your full Muscle Debt Score?</h2>
+    <p class="sub" style="margin-bottom:22px; font-size:14px;">We'll email your complete breakdown and 6-week action plan so you've actually got it to keep and refer back to \u2014 not just a number that flashes on a screen once.</p>
+    <label class="field-label">First name</label>
+    <input type="text" id="leadName" placeholder="First name">
+    <label class="field-label">Email</label>
+    <input type="email" id="leadEmail" placeholder="you@email.com">
+    <button class="btn" id="leadNext">Unlock My Full Muscle Debt Score</button>
+    <p class="disclaimer">Your Muscle Debt Score is an estimate based on published clinical research on body composition changes during weight loss. It is not a diagnosis and does not replace a body composition scan (DEXA/BIA) or medical evaluation.</p>
+  `;
+  document.getElementById('leadNext').onclick = ()=>{
+    const name = document.getElementById('leadName').value.trim();
+    const email = document.getElementById('leadEmail').value.trim();
+    if(!name || !email || !email.includes('@')){
+      document.getElementById('leadEmail').style.borderColor = 'var(--rust-bright)';
+      return;
+    }
+    state.answers._name = name;
+    state.answers._email = email;
+    const resultsURL = buildResultsURL();
+    submitToKit(name, email, state.branch, state.gated, resultsURL);
+    state.step = 'results';
+    render();
+  };
+}
+
+function renderResults(){
+  setProgress(0,0);
+  let calc;
+  if(state.branch === 'glp1') calc = calcGLP1(state.answers);
+  else if(state.branch === 'surgery') calc = calcSurgery(state.answers);
+  else calc = calcNatural(state.answers);
+
+  const tier = tierOf(calc.score);
+  const c = copy[state.branch][tier];
+  const circumference = 2 * Math.PI * 70; // half-circle approx via arc path below
+  const arcLen = 220; // approximate path length of the drawn arc (see path d)
+  const dashOffset = arcLen - (arcLen * (calc.score/100));
+
+  screenEl.innerHTML = `
+    <p style="font-family:var(--font-body); font-size:14px; font-weight:600; color:var(--rust-bright); margin-bottom:18px; line-height:1.5;">We know you can't wait \u2014 here's your full breakdown. It's also sitting in your inbox right now, so you don't lose it.</p>
+    <div class="score-wrap">
+      <div class="gauge">
+        <svg viewBox="0 0 220 130">
+          <path d="M20,120 A90,90 0 0 1 200,120" fill="none" stroke="#E5E5E5" stroke-width="14" stroke-linecap="round"/>
+          <path id="arc" d="M20,120 A90,90 0 0 1 200,120" fill="none" stroke="#0060F0" stroke-width="14" stroke-linecap="round"
+                stroke-dasharray="${arcLen}" stroke-dashoffset="${arcLen}"/>
+        </svg>
+        <div class="gauge-num">${calc.score}<span>/100</span></div>
+      </div>
+      <div class="gauge-caption">Muscle Debt Score</div>
+      <p style="font-size:12px; color:var(--ash); margin-top:4px; text-align:center; max-width:280px;">Muscle Debt = the muscle you lost along with the fat, without meaning to.</p>
+    </div>
+
+    <div class="tier-badge">${c.badge}</div>
+    <h2 class="result-headline">${c.headline}</h2>
+    <p class="result-body">${c.body(calc.lost)}</p>
+
+    <div class="scale-wrap">
+      <div class="scale-label">Where your score sits</div>
+      <div class="scale-track">
+        <div class="scale-zone" style="width:25%; background:#3D6B4A;"></div>
+        <div class="scale-zone" style="width:25%; background:#8B7A2E;"></div>
+        <div class="scale-zone" style="width:25%; background:#A05A20;"></div>
+        <div class="scale-zone" style="width:25%; background:#8B3A1F;"></div>
+        <div class="scale-marker" data-label="You: ${calc.score}" style="left:${calc.score}%;"></div>
+      </div>
+      <div class="scale-zone-labels">
+        <span>Minimal</span><span>Moderate</span><span>High</span><span>Severe</span>
+      </div>
+    </div>
+
+    <div class="cta-block">
+      ${state.gated ? `
+        <h4>Your number's real. Let's make sure it's safe to act on.</h4>
+        <p>Before you train against this, get a green light from your doctor or surgeon. That's not us passing the buck \u2014 it's the one thing a quiz can't determine for you.<br><br>Come back the day you're cleared. KTAW will be here, and your Muscle Debt Score doesn't expire.</p>
+        <button class="btn ghost" disabled>We'll notify you when you're ready</button>
+      ` : `
+        ${offerCopy[state.branch].letter.map(p => `<p style="font-size:15px; line-height:1.65; color:var(--bone); margin-bottom:16px;">${p}</p>`).join('')}
+        <ul style="list-style:none; margin-bottom:16px; margin-top:20px;">
+          ${skeleton.map(s => `
+            <li style="display:flex; gap:10px; margin-bottom:10px; font-size:14px; line-height:1.5; color:var(--bone);">
+              <span style="color:var(--ash); flex-shrink:0;">\u2014</span><span>${s}</span>
+            </li>
+          `).join('')}
+        </ul>
+        <p style="font-size:15px; line-height:1.65; color:var(--bone); margin-bottom:20px;">${skeletonReveal}</p>
+        <h4>It's called Kettlebellin': The Atlas Way.</h4>
+        <p style="font-size:14px; color:var(--ash); margin-bottom:12px; line-height:1.6;">Six weeks. A light, medium, and heavy kettlebell, and a guide that tells you exactly which to grab and when \u2014 no gym membership to cancel later, no app guessing at a plan that doesn't know your history.</p>
+        <ul style="list-style:none; margin-bottom:18px; margin-top:12px;">
+          ${ktawBenefits.map(b => `
+            <li style="display:flex; gap:10px; margin-bottom:10px; font-size:14px; line-height:1.5; color:var(--bone);">
+              <span style="color:var(--rust-bright); flex-shrink:0;">\u2713</span><span>${b}</span>
+            </li>
+          `).join('')}
+        </ul>
+        <p style="font-size:14px; color:var(--ash); margin-bottom:18px;">Six weeks. Not a trend, not a quick fix \u2014 the actual work, laid out day by day so you're never guessing.</p>
+        <div class="banner-offer">
+          <div class="banner-offer-eyebrow">The Offer</div>
+          <h4 style="font-family:var(--font-display); font-size:20px; margin-bottom:6px;">Kettlebellin': The Atlas Way \u2014 $${KTAW_PRICE}</h4>
+          <p style="font-size:13px; color:var(--ash); margin-bottom:16px;">One price. It was never marked up to be marked down.</p>
+          <p style="font-size:14px; color:var(--bone); margin-bottom:18px; line-height:1.6;">The Atlas Nutrition System is included \u2014 no charge. Twelve built-out meals, full grocery list, normally $27 on its own.</p>
+          <a class="btn" href="${KTAW_CHECKOUT_URL}">Start Kettlebellin': The Atlas Way \u2014 $${KTAW_PRICE}</a>
+          <p style="font-size:12px; color:var(--ash); margin-top:10px; text-align:center;">Secure checkout. Instant access to your KTAW Hub.</p>
+        </div>
+      `}
+    </div>
+
+    <p class="disclaimer"><strong style="color:var(--bone);">About Your Muscle Debt Score:</strong> This score is an estimate, built from your inputs and published research on weight loss and muscle loss \u2014 not a diagnosis, not a lab measurement, and not a substitute for a conversation with your doctor. Individual results vary based on factors this assessment can't fully capture. If you have a medical condition, take medication, or have concerns about starting a new training program, talk to a physician before beginning any exercise protocol, including Kettlebellin': The Atlas Way.</p>
+    <p style="font-size:12px; color:var(--ash); margin-top:10px;"><a href="/privacy.html" style="color:var(--ash);">Privacy Policy</a></p>
+  `;
+
+  // animate the arc fill
+  requestAnimationFrame(()=>{
+    const arcEl = document.getElementById('arc');
+    arcEl.style.transition = 'stroke-dashoffset 1s ease';
+    setTimeout(()=>{ arcEl.style.strokeDashoffset = dashOffset; }, 80);
+  });
+}
+
+/* ---------------- INIT ---------------- */
+/* ---------------- RESULTS RETRIEVAL (for email "see your results again" links) ---------------- */
+// No backend exists, so a visitor's exact result is encoded directly into their
+// results URL. Revisiting that URL decodes it and jumps straight to results —
+// no server, no database, just the same math run again on the same inputs.
+
+function buildResultsURL(){
+  const params = new URLSearchParams();
+  params.set('branch', state.branch);
+  params.set('gated', state.gated ? '1' : '0');
+  Object.keys(state.answers).forEach(k=>{
+    if(k.startsWith('_')) return; // skip name/email — not needed to recompute, keeps PII out of the URL
+    params.set(k, state.answers[k]);
+  });
+  return window.location.origin + window.location.pathname + '?' + params.toString();
+}
+
+function tryLoadResultsFromURL(){
+  const params = new URLSearchParams(window.location.search);
+  if(!params.has('branch') || !branches[params.get('branch')]) return false;
+  state.branch = params.get('branch');
+  state.gated = params.get('gated') === '1';
+  state.answers = {};
+  for(const [k, v] of params.entries()){
+    if(k === 'branch' || k === 'gated') continue;
+    const num = parseFloat(v);
+    state.answers[k] = isNaN(num) ? v : num;
+  }
+  state.step = 'results';
+  return true;
+}
+
+/* ---------------- INIT ---------------- */
+if(!tryLoadResultsFromURL()){
+  state.step = 'landing';
+}
+render();
+</script>
+</body>
+</html>
