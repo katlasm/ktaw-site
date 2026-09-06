@@ -426,11 +426,15 @@ const KTAW_PRICE = 497;
 // never appears anywhere a visitor could view page source and steal it.
 async function submitToKit(name, email, branch, gated, resultsURL){
   try{
-    await fetch('/.netlify/functions/kit-tag', {
+    const res = await fetch('/.netlify/functions/kit-tag', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name, email, branch, gated, resultsURL })
     });
+    if(!res.ok){
+      const errBody = await res.text();
+      console.error('Kit tagging failed — status', res.status, '— details:', errBody);
+    }
   }catch(err){
     console.warn('Kit submission failed silently — do not block the user on this:', err);
   }

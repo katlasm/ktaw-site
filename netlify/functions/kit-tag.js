@@ -55,7 +55,7 @@ exports.handler = async function (event) {
 
   try {
     // Step 1 — create/update the subscriber with name + results URL field
-    await fetch(`${KIT_API_BASE}/subscribers`, {
+    const subRes = await fetch(`${KIT_API_BASE}/subscribers`, {
       method: "POST",
       headers,
       body: JSON.stringify({
@@ -64,9 +64,19 @@ exports.handler = async function (event) {
         fields: { results_url: resultsURL || "" }
       })
     });
+    if (!subRes.ok) {
+      const errText = await subRes.text();
+      console.error('Kit subscriber creation failed:', subRes.status, errText);
+      return { statusCode: 500, body: JSON.stringify({ error: "Kit subscriber creation failed", status: subRes.status, detail: errText }) };
+    }
 
     // Step 2 — fetch all tags once, find the IDs we need
     const tagsRes = await fetch(`${KIT_API_BASE}/tags`, { headers });
+    if (!tagsRes.ok) {
+      const errText = await tagsRes.text();
+      console.error('Kit list-tags call failed:', tagsRes.status, errText);
+      return { statusCode: 500, body: JSON.stringify({ error: "Kit list-tags call failed", status: tagsRes.status, detail: errText }) };
+    }
     const tagsData = await tagsRes.json();
     const allTags = tagsData.tags || [];
 
@@ -74,30 +84,43 @@ exports.handler = async function (event) {
     const statusTag = allTags.find(t => t.name === statusTagName);
 
     if (!branchTag || !statusTag) {
+      const missing = [!branchTag ? branchTagName : null, !statusTag ? statusTagName : null].filter(Boolean);
+      console.error('Tags not found in Kit:', missing, '— full tag list from Kit:', allTags.map(t => t.name));
       return {
         statusCode: 500,
         body: JSON.stringify({
           error: "One or more tags not found in Kit — confirm all 7 tags are created with exact spelling",
-          missing: [!branchTag ? branchTagName : null, !statusTag ? statusTagName : null].filter(Boolean)
+          missing
         })
       };
     }
 
     // Step 3 — apply both tags
-    await fetch(`${KIT_API_BASE}/tags/${branchTag.id}/subscribers`, {
+    const branchTagRes = await fetch(`${KIT_API_BASE}/tags/${branchTag.id}/subscribers`, {
       method: "POST",
       headers,
       body: JSON.stringify({ email_address: email })
     });
+    if (!branchTagRes.ok) {
+      const errText = await branchTagRes.text();
+      console.error('Applying branch tag failed:', branchTagRes.status, errText);
+      return { statusCode: 500, body: JSON.stringify({ error: "Applying branch tag failed", status: branchTagRes.status, detail: errText }) };
+    }
 
-    await fetch(`${KIT_API_BASE}/tags/${statusTag.id}/subscribers`, {
+    const statusTagRes = await fetch(`${KIT_API_BASE}/tags/${statusTag.id}/subscribers`, {
       method: "POST",
       headers,
       body: JSON.stringify({ email_address: email })
     });
+    if (!statusTagRes.ok) {
+      const errText = await statusTagRes.text();
+      console.error('Applying status tag failed:', statusTagRes.status, errText);
+      return { statusCode: 500, body: JSON.stringify({ error: "Applying status tag failed", status: statusTagRes.status, detail: errText }) };
+    }
 
     return { statusCode: 200, body: JSON.stringify({ success: true }) };
   } catch (err) {
+    console.error('Unexpected error in kit-tag function:', err);
     return { statusCode: 500, body: JSON.stringify({ error: "Kit request failed", detail: String(err) }) };
   }
 };
