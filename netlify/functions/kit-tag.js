@@ -41,12 +41,12 @@ exports.handler = async function (event) {
   }
 
   const branchTagMap = {
-    glp1: "branch_glp1",
-    surgery: "branch_surgery",
-    natural: "branch_nutrition"
+    glp1: "Branch - GLP1",
+    surgery: "Branch - Surgery",
+    natural: "Branch - Nutrition"
   };
   const branchTagName = branchTagMap[branch];
-  const statusTagName = gated ? "flagged_lead" : "standard_lead";
+  const statusTagName = gated ? "Flagged - Lead" : "Standard - Lead";
 
   const headers = {
     "Content-Type": "application/json",
