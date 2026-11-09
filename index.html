@@ -971,8 +971,8 @@ function renderLead(){
   screenEl.innerHTML = `
     <div class="eyebrow">Here's what we're seeing</div>
     <p class="result-body" style="font-size:16px; margin-bottom:24px;">${preview}</p>
-    <h2 class="q" style="font-size:22px;">Where should we send your full Muscle Debt Score?</h2>
-    <p class="sub" style="margin-bottom:22px; font-size:14px;">We'll email your complete breakdown and 6-week action plan so you've actually got it to keep and refer back to \u2014 not just a number that flashes on a screen once.</p>
+    <h2 class="q" style="font-size:22px;">Unlock your full Muscle Debt Score.</h2>
+    <p class="sub" style="margin-bottom:22px; font-size:14px;">Your full breakdown shows on the next screen. Take a screenshot to keep it.</p>
     <label class="field-label">First name</label>
     <input type="text" id="leadName" placeholder="First name">
     <label class="field-label">Email</label>
@@ -1010,7 +1010,7 @@ function renderResults(){
   const dashOffset = arcLen - (arcLen * (calc.score/100));
 
   screenEl.innerHTML = `
-    <p style="font-family:var(--font-body); font-size:14px; font-weight:600; color:var(--rust-bright); margin-bottom:18px; line-height:1.5;">We know you can't wait \u2014 here's your full breakdown. It's also sitting in your inbox right now, so you don't lose it.</p>
+    <p style="font-family:var(--font-body); font-size:14px; font-weight:600; color:var(--rust-bright); margin-bottom:18px; line-height:1.5;">We know you can't wait — here's your full breakdown. Take a screenshot to keep it.</p>
     <div class="score-wrap">
       <div class="gauge">
         <svg viewBox="0 0 220 130">
@@ -1046,7 +1046,7 @@ function renderResults(){
       ${state.gated ? `
         <h4>Your number's real. Let's make sure it's safe to act on.</h4>
         <p>Before you train against this, get a green light from your doctor or surgeon. That's not us passing the buck \u2014 it's the one thing a quiz can't determine for you.<br><br>Come back the day you're cleared. KTAW will be here, and your Muscle Debt Score doesn't expire.</p>
-        <button class="btn ghost" disabled>We'll notify you when you're ready</button>
+        <button class="btn ghost" disabled>Get cleared first, then come back</button>
       ` : `
         ${offerCopy[state.branch].letter.map(p => `<p style="font-size:15px; line-height:1.65; color:var(--bone); margin-bottom:16px;">${p}</p>`).join('')}
         <ul style="list-style:none; margin-bottom:16px; margin-top:20px;">
