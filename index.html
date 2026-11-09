@@ -1048,6 +1048,8 @@ function renderResults(){
         <p>Before you train against this, get a green light from your doctor or surgeon. That's not us passing the buck \u2014 it's the one thing a quiz can't determine for you.<br><br>Come back the day you're cleared. KTAW will be here, and your Muscle Debt Score doesn't expire.</p>
         <button class="btn ghost" disabled>Get cleared first, then come back</button>
       ` : `
+<div style="border:1px solid var(--steel); padding:18px; margin:20px 0;"><h4>Your Repayment Targets</h4><p style="font-size:15px; line-height:1.65; color:var(--bone); margin-bottom:10px;">Two numbers to start on today. Protein: about ${Math.round(state.answers.currentWeight*0.7)} grams a day. Training: resistance work at least 2 days a week.</p><p style="font-size:12px; color:var(--ash); margin:0;">Estimates, not medical advice. Based on about 0.7 g of protein per pound of body weight and the 2 days a week resistance training guideline. Check with your doctor first.</p></div>
+
         ${offerCopy[state.branch].letter.map(p => `<p style="font-size:15px; line-height:1.65; color:var(--bone); margin-bottom:16px;">${p}</p>`).join('')}
         <ul style="list-style:none; margin-bottom:16px; margin-top:20px;">
           ${skeleton.map(s => `
